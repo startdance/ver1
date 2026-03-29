@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Регистрация команды</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #080810;
+      --surface: #0f0f1a;
+      --card: #13131f;
+      --border: #1e1e30;
+      --accent: #e040c8;
+      --accent2: #7c3aed;
+      --glow: rgba(224,64,200,0.18);
+      --text: #f0eefa;
+      --muted: #5a5870;
+      --success: #34d399;
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-body: 'Raleway', sans-serif;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 16px 60px;
+      overflow-x: hidden;
+    }
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.18;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .blob1 { width: 500px; height: 500px; background: var(--accent2); top: -150px; left: -100px; animation: drift 18s ease-in-out infinite alternate; }
+    .blob2 { width: 400px; height: 400px; background: var(--accent); bottom: -100px; right: -80px; animation: drift 14s ease-in-out infinite alternate-reverse; }
+    @keyframes drift { from { transform: translate(0,0) scale(1); } to { transform: translate(40px,30px) scale(1.1); } }
+    .wrap { position: relative; z-index: 1; width: 100%; max-width: 560px; }
+    .header { text-align: center; margin-bottom: 36px; }
+    .header-tag {
+      display: inline-block;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid rgba(224,64,200,0.35);
+      padding: 4px 14px;
+      border-radius: 100px;
+      margin-bottom: 14px;
+    }
+    .header h1 {
+      font-family: var(--font-display);
+      font-size: clamp(38px,8vw,58px);
+      letter-spacing: 0.06em;
+      line-height: 1;
+      background: linear-gradient(135deg,#fff 0%,var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .header p { margin-top: 12px; color: var(--muted); font-size: 14px; font-weight: 300; line-height: 1.7; }
+    .progress-wrap { margin-bottom: 28px; }
+    .progress-info { display: flex; justify-content: space-between; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    .progress-track { height: 2px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg,var(--accent2),var(--accent)); border-radius: 2px; transition: width 0.5s cubic-bezier(.4,0,.2,1); width: 0%; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 44px;
+      box-shadow: 0 0 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03) inset;
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg,transparent,var(--accent),var(--accent2),transparent);
+    }
+    .q-block { display: none; }
+    .q-block.active { display: block; animation: fadeUp 0.4s ease forwards; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+    .q-num { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+    .q-text { font-family: var(--font-display); font-size: clamp(20px,4vw,26px); letter-spacing: 0.05em; line-height: 1.2; margin-bottom: 28px; }
+    .field { position: relative; }
+    input[type="text"], input[type="number"], select {
+      width: 100%;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 16px;
+      font-weight: 400;
+      padding: 14px 16px;
+      outline: none;
+      transition: border-color 0.25s, box-shadow 0.25s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
+    input::placeholder { color: var(--muted); font-weight: 300; }
+    select option { background: #1a1a2e; color: var(--text); }
+    select option[value=""] { color: var(--muted); }
+    .select-wrap { position: relative; }
+    .select-wrap::after { content:'▾'; position:absolute; right:14px; top:50%; transform:translateY(-50%); color:var(--accent); pointer-events:none; font-size:14px; }
+    .btn-row { display: flex; gap: 12px; margin-top: 28px; flex-wrap: wrap; }
+    .btn {
+      flex: 1;
+      min-width: 120px;
+      font-family: var(--font-body);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 14px 24px;
+      border-radius: 3px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-primary { background: linear-gradient(135deg,var(--accent2),var(--accent)); color:#fff; box-shadow:0 4px 20px rgba(224,64,200,0.3); }
+    .btn-primary:hover { box-shadow:0 6px 28px rgba(224,64,200,0.5); transform:translateY(-1px); }
+    .btn-primary:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
+    .btn-secondary { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+    .btn-secondary:hover { color: var(--text); border-color: var(--muted); }
+    .err { color: #f87171; font-size: 12px; margin-top: 8px; display: none; }
+    .spinner { width:18px; height:18px; border:2px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin 0.7s linear infinite; display:none; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    #screen-success { display:none; animation:fadeUp 0.5s ease forwards; }
+    #screen-success.show { display:block; }
+    .success-icon { width:64px; height:64px; background:linear-gradient(135deg,var(--accent2),var(--accent)); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:28px; margin:0 auto 24px; animation:pop 0.5s cubic-bezier(.175,.885,.32,1.275); }
+    @keyframes pop { from{transform:scale(0);opacity:0;} to{transform:scale(1);opacity:1;} }
+    .success-title { font-family:var(--font-display); font-size:36px; letter-spacing:0.08em; text-align:center; margin-bottom:16px; }
+    .success-text { color:var(--muted); font-size:14px; line-height:1.8; text-align:center; margin-bottom:32px; }
+    .payment-box { background:rgba(224,64,200,0.07); border:1px solid rgba(224,64,200,0.25); border-radius:4px; padding:24px 28px; text-align:center; }
+    .pay-label { font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+    .pay-count { font-family:var(--font-display); font-size:22px; letter-spacing:0.05em; margin-bottom:20px; }
+    .btn-pay { display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,var(--accent2),var(--accent)); color:#fff; text-decoration:none; font-family:var(--font-body); font-size:13px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; padding:14px 32px; border-radius:3px; box-shadow:0 4px 20px rgba(224,64,200,0.35); transition:all 0.2s; }
+    .btn-pay:hover { box-shadow:0 6px 28px rgba(224,64,200,0.55); transform:translateY(-1px); }
+    @media(max-width:520px){ .card{padding:28px 20px;} }
+  </style>
+</head>
+<body>
+<div class="blob blob1"></div>
+<div class="blob blob2"></div>
+
+<div class="wrap">
+  <div class="header">
+    <div class="header-tag">Регистрация команды</div>
+    <h1>DANCE<br>BATTLE</h1>
+    <p>Заполните анкету, чтобы зарегистрировать<br>вашу команду на соревнование</p>
+  </div>
+
+  <div class="progress-wrap" id="progress-wrap">
+    <div class="progress-info">
+      <span id="step-label">Шаг 1 из 12</span>
+      <span id="step-pct">0%</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+  </div>
+
+  <div class="card" id="form-card">
+
+    <div class="q-block active" id="q1">
+      <div class="q-num">Вопрос 1 из 12</div>
+      <div class="q-text">Пожалуйста, отправьте ваш адрес электронной почты</div>
+      <div class="field"><input type="text" id="f-email" placeholder="example@mail.ru" autocomplete="off"></div>
+      <div class="err" id="err-email">Пожалуйста, введите email</div>
+      <div class="btn-row"><button class="btn btn-primary" onclick="next(1)">Далее →</button></div>
+    </div>
+
+    <div class="q-block" id="q2">
+      <div class="q-num">Вопрос 2 из 12</div>
+      <div class="q-text">Пожалуйста, укажите вашу номинацию</div>
+      <div class="field select-wrap">
+        <select id="f-nomination">
+          <option value="">— Выбрать номинацию —</option>
+          <option>STRIP DANCE SHOW</option>
+          <option>STREET Styles show</option>
+          <option>BEST DANCE PERFOMANCE</option>
+          <option>Parents crew</option>
+          <option>CONTEMPORARY</option>
+          <option>DIVA MIX</option>
+          <option>K-POP</option>
+          <option>HIGH HEELS</option>
+          <option>SOCIAL SHOW</option>
+          <option>MEGA CREW</option>
+        </select>
+      </div>
+      <div class="err" id="err-nomination">Пожалуйста, выберите номинацию</div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="prev(2)">← Назад</button>
+        <button class="btn btn-primary" onclick="next(2)">Далее →</button>
+      </div>
+    </div>
+
+    <div class="q-block" id="q3">
+      <div class="q-num">Вопрос 3 из 12</div>
+      <div class="q-text">Пожалуйста, выберите возрастную категорию</div>
+      <div class="field select-wrap">
+        <select id="f-age">
+          <option value="">— Выбрать категорию —</option>
+          <option>Baby I (3-5 лет)</option>
+          <option>Baby II (6-8 лет)</option>
+          <option>Kids (9-12 лет)</option>
+          <option>Teens (13-17 лет)</option>
+          <option>Adults (18+)</option>
+        </select>
+      </div>
+      <div class="err" id="err-age">Пожалуйста, выберите возрастную категорию</div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="prev(3)">← Назад</button>
+        <button class="btn btn-primary" onclick="next(3)">Далее →</button>
+      </div>
+    </div>
+
+    <div class="q-block" id="q4">
+      <div class="q-num">Вопрос 4 из 12</div>
+      <div class="q-text">Пожалуйста, укажите ваш уровень</div>
+      <div class="field select-wrap">
+        <select id="f-level">
+          <option value="">— Выбрать уровень —</option>
+          <option>Beginners</option>
+          <option>Middle</option>
+          <option>Pro</option>
+        </select>
+      </div>
+      <div class="err" id="err-level">Пожалуйста, выберите уровень</div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="prev(4)">← Назад</button>
+        <button class="btn btn-primary" onclick="next(4)">Далее →</button>
+      </div>
+    </div>
+
+    <div class="q-block" id="q5">
+      <div class="q-num">Вопрос 5 из 12</div>
+      <div class="q-text">Название танцевальной студии и ваш город</div>
+      <div class="field"><input type="text" id="f-studio" placeholder="Например: Студия BLACK FOX, город — Москва" autocomplete="off"></div>
+      <div class="err" id="err-studio">Пожалуйста, укажите студию и город</div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="prev(5)">← Назад</button>
+        <button class="btn btn-primary" onclick="next(5)">Далее →</button>
+      </div>
+    </div>
+
+    <div class="q-block" id="q6">
+      <div class="q-num">Вопрос 6 из 12</div>
+      <div class="q-text">Название вашей команды</div>
+      <div class="field"><input type="text" id="f-team" placeholder="Введите название команды" autocomplete="off"></div>
+      <div class="err" id="err-team">Пожалуйста, введите название команды</div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="prev(6)">← Назад</button>
+        <button class="btn btn-primary" onclick="next(6)">Далее →</button>
+      </div>
+    </div>
+
+    <div class="q-block" id="q7">
+      <div class="q-num">Вопрос 7 из 12</div>
+      <div class="q-text">Название вашего танцевального номера</div>
+      <div class="field"><input type="text" id="f-dance" placeholder="Введите название номера" autocomplete="off"></div>
+      <div class="err" id="err-dance">Пожалуйста, введите название номера</div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="prev(7)">← Назад</button>
+        <button class="btn btn-primary" onclick="next(7)">Далее →</button>
+      </div>
+    </div>
+
+    <div class="q-block" id="q8">
+      <div class="q-num">Вопрос 8 из 12</div>
+      <div class="q-text">Количество участников</div>
+      <div class="field"><input type="number" id="f-count" placeholder="Например: 5" min="3" max="42" autocomplete="off"></div>
+      <div class="err" id="err-count">Пожалуйста, укажите количество участников (от 3 до 42)</div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="prev(8)">← Назад</button>
+        <button class="btn btn-primary" onclick="next(8)">Далее →</button>
+      </div>
+    </div>
+
+    <div class="q-block" id="q9">
+      <div class="q-num">Вопрос 9 из 12</div>
+      <div class="q-text">Сколько минут длится ваш номер?</div>
+      <div class="field"><input type="text" id="f-duration" placeholder="Например: 3:45" autocomplete="off"></div>
+      <div class="err" id="err-duration">Пожалуйста, укажите длительность в формате минут:секунд</div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="prev(9)">← Назад</button>
+        <button class="btn btn-primary" onclick="next(9)">Далее →</button>
+      </div>
+    </div>
+
+    <div class="q-block" id="q10">
+      <div class="q-num">Вопрос 10 из 12</div>
+      <div class="q-text">Ф.И.О хореографа или представителя команды</div>
+      <div class="field"><input type="text" id="f-choreo" placeholder="Иванова Мария Петровна" autocomplete="off"></div>
+      <div class="err" id="err-choreo">Пожалуйста, введите Ф.И.О хореографа</div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="prev(10)">← Назад</button>
+        <button class="btn btn-primary" onclick="next(10)">Далее →</button>
+      </div>
+    </div>
+
+    <div class="q-block" id="q11">
+      <div class="q-num">Вопрос 11 из 12</div>
+      <div class="q-text">Кого бы вы хотели в следующее судейство?</div>
+      <div class="field"><input type="text" id="f-judges" placeholder="Напишите пару представителей" autocomplete="off"></div>
+      <div class="err" id="err-judges">Пожалуйста, заполните поле</div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="prev(11)">← Назад</button>
+        <button class="btn btn-primary" onclick="next(11)">Далее →</button>
+      </div>
+    </div>
+
+    <div class="q-block" id="q12">
+      <div class="q-num">Вопрос 12 из 12</div>
+      <div class="q-text">Ссылка ВКонтакте, Telegram ID или номер телефона</div>
+      <div class="field"><input type="text" id="f-contact" placeholder="vk.com/ivan или @ivan или +7..." autocomplete="off"></div>
+      <div class="err" id="err-contact">Пожалуйста, укажите контакт</div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="prev(12)">← Назад</button>
+        <button class="btn btn-primary" id="btn-submit" onclick="submitForm()">
+          <span id="btn-text">Отправить регистрацию</span>
+          <div class="spinner" id="spinner"></div>
+        </button>
+      </div>
+      <div class="err" id="err-submit" style="margin-top:12px;"></div>
+    </div>
+
+  </div>
+
+  <!-- SUCCESS -->
+  <div id="screen-success">
+    <div class="card">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">РЕГИСТРАЦИЯ ЗАВЕРШЕНА!</div>
+      <p class="success-text">
+        Все данные мы получили и сохранили.<br>
+        Если что-то нужно будет уточнить — мы свяжемся.<br><br>
+        <strong>Эта форма для регистрации команд от 3 человек.<br>Проверьте перед тем, как оплачивать.</strong>
+      </p>
+      <div class="payment-box">
+        <div class="pay-label">Оплата участия</div>
+        <div class="pay-count" id="pay-count-text">Участников: —</div>
+        <a href="#" id="pay-link" class="btn-pay" target="_blank">💳 Перейти к оплате</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ← ВСТАВЬТЕ СЮДА ВАШ URL ИЗ GOOGLE APPS SCRIPT
+  const API_URL = 'https://script.google.com/macros/s/AKfycbyDnbLlxm8OC8qoSNfKqiLUQEbjSrQH5yZp4bc22BXmN3JSUcf_ypWsiyZD6aV5KuxEhQ/exec';
+
+  const PAYMENT_LINKS = {
+    3:'https://payment.alfabank.ru/sc/WxrmufEibAaVcTJu',
+    4:'https://payment.alfabank.ru/sc/TCzNTbiqGZilZtXh',
+    5:'https://payment.alfabank.ru/sc/fSNYdJvDpXHQwtEw',
+    6:'https://payment.alfabank.ru/sc/nIXPAhRUanDKXdRp',
+    7:'https://payment.alfabank.ru/sc/pqFsuZIRrMdScSCb',
+    8:'https://payment.alfabank.ru/sc/SoAietCINbGkLWDy',
+    9:'https://payment.alfabank.ru/sc/zMAoRZOAgYgeKdYB',
+    10:'https://payment.alfabank.ru/sc/PUKCJinYAzGgEjDb',
+    11:'https://payment.alfabank.ru/sc/LVawgTuGabKAnzYc',
+    12:'https://payment.alfabank.ru/sc/aSUNdEwvLfrIYpuR',
+    13:'https://payment.alfabank.ru/sc/oYvtNXrVEfFdHiVn',
+    14:'https://payment.alfabank.ru/sc/AWCvvuKlDZDzouFy',
+    15:'https://payment.alfabank.ru/sc/BZSQDwODjTpwhCbT',
+    16:'https://payment.alfabank.ru/sc/PqIzCSUZRXBTBWKw',
+    17:'https://payment.alfabank.ru/sc/PAjGMUczCoqbmFlU',
+    18:'https://payment.alfabank.ru/sc/qiSovEHBuozJXrCp',
+    19:'https://payment.alfabank.ru/sc/ftswkDnyhRVRRbGV',
+    20:'https://payment.alfabank.ru/sc/OoSGqqWNjSnDHDTk',
+    21:'https://payment.alfabank.ru/sc/FNxHZzdhgjYIickm',
+    22:'https://payment.alfabank.ru/sc/GLIMUMjDEOBNnPuc',
+    23:'https://payment.alfabank.ru/sc/FuJkrrfmTdvFrUee',
+    24:'https://payment.alfabank.ru/sc/DRJplmPtmpPDAnzq',
+    25:'https://payment.alfabank.ru/sc/LyOSsVEkrPfMVsRh',
+    26:'https://payment.alfabank.ru/sc/OfNFxlcjOcaKAQRv',
+    27:'https://payment.alfabank.ru/sc/KKnflVvijsEHMgzN',
+    28:'https://payment.alfabank.ru/sc/KKnflVvijsEHMgzN',
+    29:'https://payment.alfabank.ru/sc/RxiivxSiAEemXBOF',
+    30:'https://payment.alfabank.ru/sc/mUOfOKmgLBpqJGjz',
+    31:'https://payment.alfabank.ru/sc/SlkvSHUWaPQZpfsN',
+    32:'https://payment.alfabank.ru/sc/qGCqjarjpgkvvPST',
+    33:'https://payment.alfabank.ru/sc/nFAtdJgNxOnyQvGS',
+    34:'https://payment.alfabank.ru/sc/ZSanFXdKAFmMtfkA',
+    35:'https://payment.alfabank.ru/sc/ybYcFURGhcVxNNDv',
+    36:'https://payment.alfabank.ru/sc/mfOmTmQzVnecMDJg',
+    37:'https://payment.alfabank.ru/sc/ofRfRorwutTlqUYT',
+    38:'https://payment.alfabank.ru/sc/GaAcjENIUmIzmIxQ',
+    39:'https://payment.alfabank.ru/sc/HqSjPYaURntpOzhU',
+    40:'https://payment.alfabank.ru/sc/vAsjAjhsnWUQImQY',
+    41:'https://payment.alfabank.ru/sc/iIGjRNRCFsYQpcwW',
+    42:'https://payment.alfabank.ru/sc/nmuLJqutCqkJRvlh',
+  };
+
+  const TOTAL = 12;
+
+  function updateProgress(step) {
+    const pct = Math.round(((step - 1) / TOTAL) * 100);
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('step-label').textContent = 'Шаг ' + step + ' из ' + TOTAL;
+    document.getElementById('step-pct').textContent = pct + '%';
+  }
+
+  function showQ(n) {
+    document.querySelectorAll('.q-block').forEach(el => el.classList.remove('active'));
+    document.getElementById('q' + n).classList.add('active');
+    updateProgress(n);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function validate(step) {
+    const rules = {
+      1:  { id:'f-email',      err:'err-email',      check: v => v.trim().length > 0 },
+      2:  { id:'f-nomination', err:'err-nomination',  check: v => v !== '' },
+      3:  { id:'f-age',        err:'err-age',         check: v => v !== '' },
+      4:  { id:'f-level',      err:'err-level',       check: v => v !== '' },
+      5:  { id:'f-studio',     err:'err-studio',      check: v => v.trim().length > 0 },
+      6:  { id:'f-team',       err:'err-team',        check: v => v.trim().length > 0 },
+      7:  { id:'f-dance',      err:'err-dance',       check: v => v.trim().length > 0 },
+      8:  { id:'f-count',      err:'err-count',       check: v => { const n=parseInt(v); return !isNaN(n)&&n>=3&&n<=42; } },
+      9:  { id:'f-duration',   err:'err-duration',    check: v => v.trim().length > 0 },
+      10: { id:'f-choreo',     err:'err-choreo',      check: v => v.trim().length > 0 },
+      11: { id:'f-judges',     err:'err-judges',      check: v => v.trim().length > 0 },
+      12: { id:'f-contact',    err:'err-contact',     check: v => v.trim().length > 0 },
+    };
+    const r = rules[step];
+    const val = document.getElementById(r.id).value;
+    const errEl = document.getElementById(r.err);
+    if (!r.check(val)) { errEl.style.display='block'; document.getElementById(r.id).focus(); return false; }
+    errEl.style.display = 'none';
+    return true;
+  }
+
+  function next(step) { if (!validate(step)) return; if (step < TOTAL) showQ(step + 1); }
+  function prev(step) { if (step > 1) showQ(step - 1); }
+
+  async function submitForm() {
+    if (!validate(12)) return;
+    const btn = document.getElementById('btn-submit');
+    const btnText = document.getElementById('btn-text');
+    const spinner = document.getElementById('spinner');
+    btn.disabled = true;
+    btnText.textContent = 'Отправляем...';
+    spinner.style.display = 'inline-block';
+
+    const count = parseInt(document.getElementById('f-count').value);
+    const payload = {
+      email:       document.getElementById('f-email').value.trim(),
+      nomination:  document.getElementById('f-nomination').value,
+      age_group:   document.getElementById('f-age').value,
+      level:       document.getElementById('f-level').value,
+      studio:      document.getElementById('f-studio').value.trim(),
+      team:        document.getElementById('f-team').value.trim(),
+      dance_name:  document.getElementById('f-dance').value.trim(),
+      count:       count,
+      duration:    document.getElementById('f-duration').value.trim(),
+      choreo:      document.getElementById('f-choreo').value.trim(),
+      judges_wish: document.getElementById('f-judges').value.trim(),
+      contact:     document.getElementById('f-contact').value.trim(),
+    };
+
+    try {
+      await fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      document.getElementById('form-card').style.display = 'none';
+      document.getElementById('progress-wrap').style.display = 'none';
+
+      const payLink = PAYMENT_LINKS[count] || PAYMENT_LINKS[42];
+      document.getElementById('pay-link').href = payLink;
+      document.getElementById('pay-count-text').textContent = 'Участников: ' + count;
+      document.getElementById('screen-success').classList.add('show');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    } catch(e) {
+      spinner.style.display = 'none';
+      btnText.textContent = 'Отправить регистрацию';
+      btn.disabled = false;
+      const errEl = document.getElementById('err-submit');
+      errEl.textContent = 'Ошибка отправки. Проверьте интернет и попробуйте снова.';
+      errEl.style.display = 'block';
+    }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const activeQ = document.querySelector('.q-block.active');
+    if (!activeQ) return;
+    const qNum = parseInt(activeQ.id.replace('q',''));
+    if (qNum < TOTAL) next(qNum);
+  });
+
+  updateProgress(1);
+</script>
+</body>
+</html>
